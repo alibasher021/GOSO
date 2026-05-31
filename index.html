@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a1628">
+<title>GOSO Evaluator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0a1628;--navy-mid:#12233f;--navy-light:#1e3a5f;
+  --gold:#c9a84c;--gold-light:#e8c97a;--cream:#f5f0e8;--cream-dark:#e8e0d0;
+  --text:#1a1a2e;--text-muted:#6b7280;--white:#ffffff;
+  --warn:#b5451b;--warn-light:#fde8e0;--radius:16px;--radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--navy);color:var(--cream);}
+
+.screen{display:none;height:100vh;height:-webkit-fill-available;flex-direction:column;overflow:hidden;}
+.screen.active{display:flex;}
+
+/* ── HOME ── */
+#screen-home{position:relative;overflow:hidden;}
+.home-bg{position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(201,168,76,.18) 0%,transparent 60%),
+             radial-gradient(ellipse 60% 40% at 80% 80%,rgba(30,58,95,.8) 0%,transparent 60%);
+  pointer-events:none;}
+.home-grid{position:absolute;inset:0;
+  background-image:linear-gradient(rgba(201,168,76,.05) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(201,168,76,.05) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;}
+.home-content{position:relative;z-index:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;flex:1;padding:48px 28px 40px;gap:0;}
+.home-badge{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
+  color:var(--gold);border:1px solid rgba(201,168,76,.4);padding:6px 16px;
+  border-radius:100px;margin-bottom:28px;animation:fadeUp .6s ease both;}
+.home-title{font-family:'DM Serif Display',serif;font-size:52px;line-height:1;
+  letter-spacing:-1px;color:var(--cream);text-align:center;margin-bottom:8px;
+  animation:fadeUp .6s .1s ease both;}
+.home-title span{color:var(--gold);font-style:italic;}
+.home-subtitle{font-size:13px;font-weight:300;color:rgba(245,240,232,.55);
+  text-align:center;letter-spacing:.5px;margin-bottom:44px;animation:fadeUp .6s .2s ease both;}
+.home-icon-wrap{width:88px;height:88px;
+  background:linear-gradient(135deg,var(--navy-light),var(--navy-mid));
+  border:1.5px solid rgba(201,168,76,.3);border-radius:24px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:40px;
+  box-shadow:0 20px 60px rgba(0,0,0,.4),inset 0 1px 0 rgba(201,168,76,.2);
+  animation:fadeUp .6s .15s ease both;}
+.home-icon-wrap svg{width:40px;height:40px;}
+.btn-primary{width:100%;max-width:320px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-light));
+  color:var(--navy);border:none;padding:18px 32px;border-radius:var(--radius);
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;letter-spacing:.3px;
+  cursor:pointer;transition:transform .15s;box-shadow:0 8px 32px rgba(201,168,76,.35);
+  animation:fadeUp .6s .3s ease both;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn-primary:active{transform:scale(.97);}
+.btn-secondary{width:100%;max-width:320px;background:transparent;
+  color:rgba(245,240,232,.6);border:1px solid rgba(245,240,232,.15);
+  padding:16px 32px;border-radius:var(--radius);font-family:'DM Sans',sans-serif;
+  font-size:14px;cursor:pointer;transition:all .15s;margin-top:12px;
+  animation:fadeUp .6s .35s ease both;}
+.btn-secondary:active{background:rgba(255,255,255,.05);}
+.home-footer{position:relative;z-index:1;padding:20px 28px;text-align:center;
+  font-size:11px;color:rgba(245,240,232,.25);letter-spacing:.5px;
+  animation:fadeUp .6s .4s ease both;}
+
+/* ── SETUP (API KEY) ── */
+#screen-setup{background:var(--navy);align-items:center;justify-content:center;padding:32px 24px;}
+.setup-card{width:100%;max-width:360px;background:var(--navy-mid);
+  border:1px solid rgba(201,168,76,.2);border-radius:var(--radius);padding:28px 24px;
+  display:flex;flex-direction:column;gap:16px;}
+.setup-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--cream);}
+.setup-desc{font-size:13px;color:rgba(245,240,232,.55);line-height:1.6;}
+.setup-desc a{color:var(--gold);text-decoration:none;}
+.setup-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.25);
+  border-radius:var(--radius-sm);padding:14px;color:var(--cream);
+  font-family:'DM Sans',sans-serif;font-size:14px;outline:none;
+  transition:border-color .2s;letter-spacing:.5px;}
+.setup-input:focus{border-color:var(--gold);}
+.setup-input::placeholder{color:rgba(245,240,232,.25);letter-spacing:0;}
+.setup-note{font-size:11px;color:rgba(245,240,232,.3);line-height:1.5;}
+.btn-save{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-light));
+  color:var(--navy);border:none;padding:16px;border-radius:var(--radius);
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;}
+.btn-save:active{opacity:.9;}
+
+/* ── CAPTURE ── */
+#screen-capture{background:#000;position:relative;}
+#video-feed{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+#canvas-capture{display:none;}
+#file-input{display:none;}
+.capture-header{position:absolute;top:0;left:0;right:0;z-index:10;
+  padding:env(safe-area-inset-top,20px) 20px 16px;
+  background:linear-gradient(to bottom,rgba(0,0,0,.7),transparent);
+  display:flex;align-items:center;gap:12px;}
+.btn-icon{width:40px;height:40px;background:rgba(255,255,255,.15);border:none;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;backdrop-filter:blur(8px);color:white;}
+.capture-title{font-family:'DM Serif Display',serif;font-size:18px;color:white;flex:1;}
+.scan-frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-54%);
+  width:85%;max-width:340px;aspect-ratio:3/4;z-index:5;pointer-events:none;}
+.scan-corner{position:absolute;width:24px;height:24px;border-color:var(--gold);border-style:solid;}
+.scan-corner.tl{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0;}
+.scan-corner.tr{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 4px 0 0;}
+.scan-corner.bl{bottom:0;left:0;border-width:0 0 3px 3px;border-radius:0 0 0 4px;}
+.scan-corner.br{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 4px 0;}
+.scan-line{position:absolute;left:4px;right:4px;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  animation:scanMove 2s ease-in-out infinite;}
+@keyframes scanMove{0%{top:4px;opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{top:calc(100% - 6px);opacity:0;}}
+.capture-hint{position:absolute;z-index:5;bottom:140px;width:100%;text-align:center;
+  font-size:12px;color:rgba(255,255,255,.6);letter-spacing:.5px;pointer-events:none;}
+.capture-controls{position:absolute;bottom:0;left:0;right:0;z-index:10;
+  padding:20px 32px env(safe-area-inset-bottom,20px);
+  background:linear-gradient(to top,rgba(0,0,0,.8),transparent);
+  display:flex;align-items:center;justify-content:center;gap:32px;}
+.shutter-btn{width:72px;height:72px;background:white;border:4px solid rgba(255,255,255,.4);
+  border-radius:50%;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;}
+.shutter-btn:active{transform:scale(.92);}
+.shutter-inner{width:56px;height:56px;background:white;border-radius:50%;border:2px solid rgba(0,0,0,.1);}
+.upload-btn{width:52px;height:52px;background:rgba(255,255,255,.15);
+  border:1px solid rgba(255,255,255,.25);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  backdrop-filter:blur(8px);color:white;}
+
+/* ── PREVIEW ── */
+#screen-preview{background:var(--navy);}
+.pv-header{background:var(--navy-mid);
+  padding:env(safe-area-inset-top,16px) 20px 16px;
+  display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(201,168,76,.15);}
+.pv-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--cream);flex:1;}
+.pv-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;}
+.img-wrap{border-radius:var(--radius);overflow:hidden;
+  border:1.5px solid rgba(201,168,76,.2);background:var(--navy-mid);}
+#preview-img{width:100%;display:block;max-height:320px;object-fit:contain;}
+.field-card{background:var(--navy-mid);border-radius:var(--radius);
+  padding:16px;border:1px solid rgba(201,168,76,.15);}
+.field-label{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:10px;display:block;}
+.text-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.2);
+  border-radius:var(--radius-sm);padding:12px 14px;color:var(--cream);
+  font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s;}
+.text-input:focus{border-color:var(--gold);}
+.text-input::placeholder{color:rgba(245,240,232,.3);}
+.pv-footer{padding:16px 20px env(safe-area-inset-bottom,16px);
+  border-top:1px solid rgba(201,168,76,.1);background:var(--navy-mid);}
+.btn-grade{width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-light));
+  color:var(--navy);border:none;padding:18px;border-radius:var(--radius);
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 4px 20px rgba(201,168,76,.3);}
+.btn-grade:active{opacity:.9;}
+.btn-grade:disabled{opacity:.5;cursor:not-allowed;}
+.error-banner{background:var(--warn-light);border:1px solid rgba(181,69,27,.2);
+  border-radius:var(--radius-sm);padding:12px 14px;font-size:13px;color:var(--warn);display:none;}
+.error-banner.visible{display:block;}
+
+/* ── LOADING ── */
+#screen-loading{background:var(--navy);align-items:center;justify-content:center;gap:28px;}
+.loading-icon{width:80px;height:80px;background:var(--navy-mid);
+  border:1.5px solid rgba(201,168,76,.3);border-radius:20px;
+  display:flex;align-items:center;justify-content:center;}
+.loading-spinner{width:32px;height:32px;border:3px solid rgba(201,168,76,.2);
+  border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-title{font-family:'DM Serif Display',serif;font-size:22px;color:var(--cream);text-align:center;}
+.loading-steps{display:flex;flex-direction:column;gap:10px;width:100%;max-width:280px;}
+.loading-step{display:flex;align-items:center;gap:12px;font-size:13px;
+  color:rgba(245,240,232,.4);transition:color .4s;}
+.loading-step.active{color:var(--gold);}
+.loading-step.done{color:rgba(245,240,232,.6);}
+.step-dot{width:8px;height:8px;border-radius:50%;background:rgba(245,240,232,.15);
+  flex-shrink:0;transition:background .4s;}
+.loading-step.active .step-dot{background:var(--gold);box-shadow:0 0 8px rgba(201,168,76,.6);}
+.loading-step.done .step-dot{background:rgba(245,240,232,.4);}
+
+/* ── RESULTS ── */
+#screen-results{background:var(--cream);}
+.rs-header{background:var(--navy);padding:env(safe-area-inset-top,16px) 20px 20px;
+  display:flex;align-items:center;gap:12px;}
+.rs-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--cream);flex:1;}
+.rs-body{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:16px;
+  -webkit-overflow-scrolling:touch;}
+.score-summary{background:var(--navy);border-radius:var(--radius);
+  padding:24px 20px;position:relative;overflow:hidden;}
+.score-summary-bg{position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 80% at 90% -20%,rgba(201,168,76,.2),transparent 60%);
+  pointer-events:none;}
+.score-top{display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:16px;position:relative;z-index:1;gap:12px;}
+.student-name-display{font-family:'DM Serif Display',serif;font-size:22px;
+  color:var(--cream);line-height:1.2;}
+.score-badge{text-align:right;}
+.score-number{font-family:'DM Serif Display',serif;font-size:42px;color:var(--gold);line-height:1;}
+.score-denom{font-size:16px;color:rgba(245,240,232,.4);}
+.score-pct{font-size:13px;color:rgba(201,168,76,.7);text-align:right;margin-top:2px;}
+.score-bar-wrap{background:rgba(255,255,255,.08);border-radius:100px;height:6px;
+  margin-bottom:14px;position:relative;z-index:1;overflow:hidden;}
+.score-bar-fill{height:100%;border-radius:100px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-light));
+  transition:width 1s cubic-bezier(.25,1,.5,1);}
+.score-grade-label{display:inline-flex;align-items:center;gap:6px;font-size:12px;
+  font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);
+  position:relative;z-index:1;}
+.criteria-card{background:var(--white);border-radius:var(--radius);padding:18px;
+  border:1px solid rgba(0,0,0,.06);box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.cc-header{display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:10px;gap:12px;}
+.cc-name{font-family:'DM Serif Display',serif;font-size:16px;color:var(--text);
+  line-height:1.3;flex:1;}
+.cc-weight{font-size:10px;font-weight:600;letter-spacing:1px;color:var(--text-muted);
+  background:#f3f4f6;padding:3px 8px;border-radius:100px;white-space:nowrap;}
+.score-dots-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.score-dots{display:flex;gap:5px;flex:1;}
+.dot{flex:1;height:6px;border-radius:100px;background:#e5e7eb;transition:background .3s;}
+.dot.filled{background:var(--gold);}
+.cc-score-num{font-family:'DM Serif Display',serif;font-size:20px;color:var(--navy);white-space:nowrap;}
+.cc-level{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:6px;}
+.cc-remark{font-size:13px;color:#374151;line-height:1.6;background:#f9fafb;
+  border-radius:var(--radius-sm);padding:10px 12px;border-left:3px solid var(--gold);}
+.edit-toggle-btn{background:none;border:1px dashed #d1d5db;border-radius:8px;
+  padding:6px 12px;font-size:12px;color:var(--text-muted);cursor:pointer;
+  margin-top:10px;width:100%;font-family:'DM Sans',sans-serif;}
+.edit-score-wrap{display:none;margin-top:12px;padding-top:12px;
+  border-top:1px solid #e5e7eb;gap:8px;align-items:center;}
+.edit-score-wrap.visible{display:flex;}
+.score-btn{width:36px;height:36px;border-radius:8px;border:1.5px solid #d1d5db;
+  background:white;font-size:18px;color:var(--text);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-weight:600;}
+.score-current-val{flex:1;text-align:center;font-family:'DM Serif Display',serif;
+  font-size:22px;color:var(--navy);}
+.edit-remark-input{width:100%;background:white;border:1px solid #d1d5db;
+  border-radius:var(--radius-sm);padding:10px 12px;font-family:'DM Sans',sans-serif;
+  font-size:13px;color:var(--text);outline:none;resize:vertical;min-height:80px;
+  margin-top:8px;display:none;}
+.edit-remark-input.visible{display:block;}
+.edit-remark-input:focus{border-color:var(--gold);}
+.transcribed-section{background:white;border-radius:var(--radius);padding:16px;
+  border:1px solid rgba(0,0,0,.06);}
+.section-title{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:10px;}
+.transcribed-text{font-size:13px;color:#374151;line-height:1.7;white-space:pre-wrap;}
+.rs-footer{padding:12px 20px env(safe-area-inset-bottom,12px);
+  border-top:1px solid rgba(0,0,0,.08);background:white;display:flex;gap:10px;}
+.btn-share{flex:1;background:var(--navy);color:white;border:none;padding:16px;
+  border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;
+  font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-share:active{opacity:.9;}
+.btn-new{background:var(--cream-dark);color:var(--text);border:none;padding:16px 20px;
+  border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:14px;
+  font-weight:600;cursor:pointer;}
+.btn-new:active{background:#ddd6c8;}
+
+.toast{position:fixed;bottom:80px;left:50%;
+  transform:translateX(-50%) translateY(20px);background:var(--navy);
+  color:var(--gold);padding:12px 20px;border-radius:100px;font-size:13px;
+  font-weight:500;opacity:0;transition:all .3s;z-index:999;white-space:nowrap;
+  pointer-events:none;border:1px solid rgba(201,168,76,.3);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+.fade-up{animation:fadeUp .4s ease both;}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="screen-home" class="screen active">
+  <div class="home-bg"></div>
+  <div class="home-grid"></div>
+  <div class="home-content">
+    <div class="home-badge">NSG 127.4 · Psychiatric Nursing</div>
+    <div class="home-icon-wrap">
+      <svg viewBox="0 0 40 40" fill="none">
+        <rect x="6" y="4" width="22" height="28" rx="3" stroke="#c9a84c" stroke-width="1.5"/>
+        <rect x="10" y="8" width="14" height="2" rx="1" fill="#c9a84c" opacity=".5"/>
+        <rect x="10" y="13" width="14" height="1.5" rx=".75" fill="#c9a84c" opacity=".4"/>
+        <rect x="10" y="17" width="10" height="1.5" rx=".75" fill="#c9a84c" opacity=".4"/>
+        <rect x="10" y="21" width="12" height="1.5" rx=".75" fill="#c9a84c" opacity=".4"/>
+        <circle cx="30" cy="30" r="8" fill="#1e3a5f" stroke="#c9a84c" stroke-width="1.5"/>
+        <path d="M27 30l2 2 4-4" stroke="#c9a84c" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <h1 class="home-title">GOSO<br><span>Evaluator</span></h1>
+    <p class="home-subtitle">General Objectives · Smart Grader</p>
+    <button class="btn-primary" onclick="handleScanClick()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      Scan Student Output
+    </button>
+    <button class="btn-secondary" onclick="handleUploadClick()">Upload from Gallery</button>
+  </div>
+  <div class="home-footer">MSU · College of Health Sciences · Marawi City</div>
+</div>
+
+<!-- SETUP: API KEY -->
+<div id="screen-setup" class="screen">
+  <div class="setup-card">
+    <div class="setup-title">One-Time Setup</div>
+    <div class="setup-desc">
+      GOSO Evaluator uses Google Gemini — completely free, no credit card needed.<br><br>
+      Get your free key at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a> → Get API Key. Your key is stored only on this device.
+    </div>
+    <input type="password" id="api-key-input" class="setup-input" placeholder="AIza..." autocomplete="off" spellcheck="false">
+    <div class="setup-note">Your key is saved in your browser's local storage and sent only to Google's Gemini API.</div>
+    <button class="btn-save" onclick="saveApiKey()">Save and Continue</button>
+    <button class="btn-secondary" style="max-width:100%;margin-top:0;" onclick="showScreen('screen-home')">Back</button>
+  </div>
+</div>
+
+<!-- CAPTURE -->
+<div id="screen-capture" class="screen">
+  <video id="video-feed" autoplay playsinline muted></video>
+  <canvas id="canvas-capture"></canvas>
+  <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFileUpload(event)">
+  <div class="capture-header">
+    <button class="btn-icon" onclick="stopCamera()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <span class="capture-title">Scan Output</span>
+    <button class="btn-icon" onclick="document.getElementById('file-input-gallery').click()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    </button>
+  </div>
+  <input type="file" id="file-input-gallery" accept="image/*" style="display:none" onchange="handleFileUpload(event)">
+  <div class="scan-frame">
+    <div class="scan-corner tl"></div>
+    <div class="scan-corner tr"></div>
+    <div class="scan-corner bl"></div>
+    <div class="scan-corner br"></div>
+    <div class="scan-line"></div>
+  </div>
+  <div class="capture-hint">Align handwritten objectives within the frame</div>
+  <div class="capture-controls">
+    <div style="width:52px"></div>
+    <button class="shutter-btn" onclick="capturePhoto()">
+      <div class="shutter-inner"></div>
+    </button>
+    <div style="width:52px"></div>
+  </div>
+</div>
+
+<!-- PREVIEW -->
+<div id="screen-preview" class="screen">
+  <div class="pv-header">
+    <button class="btn-icon" style="background:rgba(255,255,255,.1);border:none;" onclick="goBackToCapture()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <span class="pv-title">Review Image</span>
+  </div>
+  <div class="pv-body">
+    <div class="img-wrap"><img id="preview-img" src="" alt="Captured output"></div>
+    <div class="field-card">
+      <label class="field-label" for="student-name">Student Name</label>
+      <input type="text" id="student-name" class="text-input" placeholder="e.g. Juan dela Cruz" autocomplete="off">
+    </div>
+    <div id="preview-error" class="error-banner"></div>
+  </div>
+  <div class="pv-footer">
+    <button class="btn-grade" id="grade-btn" onclick="gradeOutput()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Grade with AI
+    </button>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="screen-loading" class="screen">
+  <div class="loading-icon"><div class="loading-spinner"></div></div>
+  <div class="loading-title">Evaluating<br>Objectives...</div>
+  <div class="loading-steps">
+    <div class="loading-step" id="step-1"><div class="step-dot"></div><span>Reading handwritten text</span></div>
+    <div class="loading-step" id="step-2"><div class="step-dot"></div><span>Applying rubric criteria</span></div>
+    <div class="loading-step" id="step-3"><div class="step-dot"></div><span>Generating remarks</span></div>
+    <div class="loading-step" id="step-4"><div class="step-dot"></div><span>Compiling results</span></div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="screen-results" class="screen">
+  <div class="rs-header">
+    <button class="btn-icon" style="background:rgba(255,255,255,.1);border:none;" onclick="newEvaluation()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+    </button>
+    <span class="rs-title">Evaluation Results</span>
+    <button class="btn-icon" style="background:rgba(255,255,255,.1);border:none;" onclick="manageApiKey()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 010 14.14M4.93 4.93a10 10 0 000 14.14"/></svg>
+    </button>
+  </div>
+  <div class="rs-body" id="results-body"></div>
+  <div class="rs-footer">
+    <button class="btn-share" onclick="shareResults()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Share Results
+    </button>
+    <button class="btn-new" onclick="newEvaluation()">New</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let capturedImageData = null;
+let mediaStream = null;
+let gradingResults = null;
+let fromGallery = false;
+
+const CRITERIA = [
+  { id:'clarity',      name:'Clarity and Conciseness',        weight:'25%' },
+  { id:'measurability',name:'Measurability',                   weight:'25%' },
+  { id:'relevance',    name:'Relevance to 2-Week Exposure',    weight:'25%' },
+  { id:'smart',        name:'SMART Format Compliance',         weight:'25%' }
+];
+
+const GRADE_LABELS = [
+  { min:18, label:'Excellent' },
+  { min:14, label:'Good' },
+  { min:10, label:'Satisfactory' },
+  { min:6,  label:'Fair' },
+  { min:0,  label:'Needs Improvement' }
+];
+
+// ── API KEY ──
+function getApiKey(){ return localStorage.getItem('goso_api_key') || ''; }
+function saveApiKey(){
+  const v = document.getElementById('api-key-input').value.trim();
+  if(!v.startsWith('AIza') && v.length < 20){showToast('Invalid key format. Should start with AIza...');return;}
+  localStorage.setItem('goso_api_key', v);
+  showToast('API key saved');
+  setTimeout(() => startCamera(), 600);
+}
+function manageApiKey(){
+  document.getElementById('api-key-input').value = getApiKey();
+  showScreen('screen-setup');
+}
+
+// ── NAVIGATION ──
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── CAMERA FLOW ──
+function handleScanClick(){
+  if(!getApiKey()){ showScreen('screen-setup'); return; }
+  startCamera();
+}
+
+function handleUploadClick(){
+  if(!getApiKey()){ showScreen('screen-setup'); return; }
+  fromGallery = true;
+  // Use a plain file input without capture attribute for gallery
+  const inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = 'image/*';
+  inp.onchange = handleFileUpload;
+  inp.click();
+}
+
+async function startCamera(){
+  fromGallery = false;
+  showScreen('screen-capture');
+  try {
+    const constraints = {
+      video: {
+        facingMode: { ideal: 'environment' },
+        width:  { ideal: 1920 },
+        height: { ideal: 1080 }
+      }
+    };
+    mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+    const vid = document.getElementById('video-feed');
+    vid.srcObject = mediaStream;
+    await vid.play();
+  } catch(e) {
+    console.error('Camera error:', e);
+    showScreen('screen-home');
+    alert('Camera not available: ' + (e.message || e) + '\n\nUse "Upload from Gallery" instead.');
+  }
+}
+
+function stopCamera(){
+  if(mediaStream){ mediaStream.getTracks().forEach(t=>t.stop()); mediaStream=null; }
+  showScreen('screen-home');
+}
+
+function goBackToCapture(){
+  if(!fromGallery) startCamera(); else showScreen('screen-home');
+}
+
+function capturePhoto(){
+  const vid = document.getElementById('video-feed');
+  const cvs = document.getElementById('canvas-capture');
+  cvs.width  = vid.videoWidth  || 1280;
+  cvs.height = vid.videoHeight || 720;
+  cvs.getContext('2d').drawImage(vid, 0, 0);
+  capturedImageData = cvs.toDataURL('image/jpeg', 0.92);
+  if(mediaStream){ mediaStream.getTracks().forEach(t=>t.stop()); mediaStream=null; }
+  showPreview();
+}
+
+function handleFileUpload(e){
+  const file = e.target ? e.target.files[0] : null;
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { capturedImageData = ev.target.result; showPreview(); };
+  reader.readAsDataURL(file);
+}
+
+function showPreview(){
+  document.getElementById('preview-img').src = capturedImageData;
+  document.getElementById('student-name').value = '';
+  document.getElementById('preview-error').classList.remove('visible');
+  document.getElementById('preview-error').textContent = '';
+  showScreen('screen-preview');
+}
+
+// ── GRADING ──
+async function gradeOutput(){
+  const key = getApiKey();
+  if(!key){ showToast('No API key. Setup required.'); showScreen('screen-setup'); return; }
+
+  const studentName = document.getElementById('student-name').value.trim() || 'Student';
+  document.getElementById('preview-error').classList.remove('visible');
+  document.getElementById('grade-btn').disabled = true;
+
+  showScreen('screen-loading');
+  animateLoadingSteps();
+
+  const base64Data  = capturedImageData.split(',')[1];
+  const mediaType   = capturedImageData.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
+
+  const systemPrompt = `You are an expert nursing clinical instructor at Mindanao State University evaluating BSN student handwritten General Objectives for a 2-week Psychiatric and Mental Health Nursing clinical exposure.
+
+Evaluate using this 4-criterion rubric, each scored 1-5:
+
+CRITERION 1 - Clarity and Conciseness (25%)
+5=Exceptionally clear, concise, free of jargon and ambiguity
+4=Clear and concise with minor improvements possible
+3=Mostly clear; some phrasing could be more direct
+2=Understandable but contains jargon or unnecessary complexity
+1=Unclear, vague, or difficult to understand
+
+CRITERION 2 - Measurability (25%)
+5=Clearly measurable; uses observable action verbs; criteria for success explicitly stated
+4=Mostly measurable; some criteria could be more specific
+3=Partially measurable; action verbs used but criteria vaguely defined
+2=Limited measurability; criteria mostly missing
+1=Not measurable; no criteria for success
+
+CRITERION 3 - Relevance to 2-Week Psychiatric Nursing Exposure (25%)
+5=Highly relevant and directly tied to clinical activities and competencies
+4=Relevant with clear connection; some could be more aligned
+3=Moderately relevant; connection to clinical exposure exists but implicit
+2=Some relevance; connection weak or inconsistent
+1=Largely irrelevant; objectives do not reflect the clinical learning experiences
+
+CRITERION 4 - SMART Format Compliance (25%)
+5=All SMART elements clearly present (Specific, Measurable, Attainable, Realistic, Time-bound)
+4=Most SMART elements present; one element could be more explicit
+3=Some SMART elements present; two or more vague
+2=Few SMART elements; format attempted but poorly executed
+1=SMART format not followed
+
+Return ONLY a valid JSON object. No preamble. No markdown fences. Exact structure:
+{"transcribed_text":"full transcribed handwritten text","scores":{"clarity":0,"measurability":0,"relevance":0,"smart":0},"remarks":{"clarity":"specific feedback","measurability":"specific feedback","relevance":"specific feedback","smart":"specific feedback"}}`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { inline_data: { mime_type: mediaType, data: base64Data } },
+              { text: systemPrompt + '\n\nEvaluate the handwritten General Objectives in this image. Return only the JSON.' }
+            ]
+          }],
+          generationConfig: { temperature: 0.2, maxOutputTokens: 1000 }
+        })
+      }
+    );
+
+    if(!res.ok){
+      const err = await res.json().catch(()=>({}));
+      throw new Error(err.error?.message || 'API error ' + res.status);
+    }
+
+    const data = await res.json();
+    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const clean   = rawText.replace(/```json|```/g,'').trim();
+    const parsed  = JSON.parse(clean);
+
+    gradingResults = { studentName, ...parsed };
+    renderResults(gradingResults);
+    showScreen('screen-results');
+
+  } catch(err) {
+    console.error('Grading error:', err);
+    showScreen('screen-preview');
+    document.getElementById('grade-btn').disabled = false;
+    const banner = document.getElementById('preview-error');
+    banner.textContent = 'Error: ' + err.message + '. Check your API key or internet connection.';
+    banner.classList.add('visible');
+  }
+}
+
+function animateLoadingSteps(){
+  const ids = ['step-1','step-2','step-3','step-4'];
+  ids.forEach(id => { const el=document.getElementById(id); el.classList.remove('active','done'); });
+  ids.forEach((id,i) => {
+    setTimeout(() => {
+      ids.slice(0,i).forEach(prev => {
+        document.getElementById(prev).classList.remove('active');
+        document.getElementById(prev).classList.add('done');
+      });
+      document.getElementById(id).classList.add('active');
+    }, i * 900);
+  });
+}
+
+// ── RENDER RESULTS ──
+function renderResults(data){
+  const scores    = data.scores;
+  const total     = scores.clarity + scores.measurability + scores.relevance + scores.smart;
+  const pct       = Math.round((total/20)*100);
+  const gradeObj  = GRADE_LABELS.find(g=>total>=g.min) || GRADE_LABELS[GRADE_LABELS.length-1];
+
+  document.getElementById('results-body').innerHTML = `
+    <div class="score-summary fade-up">
+      <div class="score-summary-bg"></div>
+      <div class="score-top">
+        <div>
+          <div style="font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:rgba(201,168,76,.6);margin-bottom:4px">Student</div>
+          <div class="student-name-display">${esc(data.studentName)}</div>
+        </div>
+        <div class="score-badge">
+          <div class="score-number">${total}<span class="score-denom">/20</span></div>
+          <div class="score-pct">${pct}%</div>
+        </div>
+      </div>
+      <div class="score-bar-wrap"><div class="score-bar-fill" id="score-bar" style="width:0%"></div></div>
+      <div class="score-grade-label">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        ${gradeObj.label}
+      </div>
+    </div>
+    ${CRITERIA.map((c,i) => {
+      const s = scores[c.id]; const r = data.remarks[c.id];
+      return `
+      <div class="criteria-card fade-up" style="animation-delay:${.1+i*.07}s" id="card-${c.id}">
+        <div class="cc-header">
+          <div class="cc-name">${c.name}</div>
+          <div class="cc-weight">${c.weight}</div>
+        </div>
+        <div class="score-dots-row">
+          <div class="score-dots">${[1,2,3,4,5].map(n=>`<div class="dot ${n<=s?'filled':''}"></div>`).join('')}</div>
+          <div class="cc-score-num">${s}<span style="font-size:13px;color:#9ca3af">/5</span></div>
+        </div>
+        <div class="cc-level">${levelLabel(s)}</div>
+        <div class="cc-remark" id="remark-${c.id}">${esc(r)}</div>
+        <button class="edit-toggle-btn" onclick="toggleEdit('${c.id}')">Edit score &amp; remark</button>
+        <div class="edit-score-wrap" id="edit-score-${c.id}">
+          <button class="score-btn" onclick="adjustScore('${c.id}',-1)">−</button>
+          <div class="score-current-val" id="score-display-${c.id}">${s}</div>
+          <button class="score-btn" onclick="adjustScore('${c.id}',1)">+</button>
+        </div>
+        <textarea class="edit-remark-input" id="edit-remark-${c.id}" onchange="updateRemark('${c.id}')">${esc(r)}</textarea>
+      </div>`;
+    }).join('')}
+    <div class="transcribed-section fade-up" style="animation-delay:.45s">
+      <div class="section-title">Transcribed Text</div>
+      <div class="transcribed-text">${esc(data.transcribed_text)}</div>
+    </div>`;
+
+  setTimeout(() => {
+    const bar = document.getElementById('score-bar');
+    if(bar) bar.style.width = pct + '%';
+  }, 150);
+}
+
+function levelLabel(s){ return {5:'Excellent',4:'Good',3:'Satisfactory',2:'Fair',1:'Needs Improvement'}[s]||''; }
+function esc(str){ return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── EDIT ──
+function toggleEdit(id){
+  document.getElementById('edit-score-'+id).classList.toggle('visible');
+  document.getElementById('edit-remark-'+id).classList.toggle('visible');
+}
+function adjustScore(id, delta){
+  const cur = gradingResults.scores[id];
+  const nv  = Math.max(1, Math.min(5, cur+delta));
+  gradingResults.scores[id] = nv;
+  document.getElementById('score-display-'+id).textContent = nv;
+  const card = document.getElementById('card-'+id);
+  card.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('filled',i<nv));
+  card.querySelector('.cc-score-num').innerHTML = nv+'<span style="font-size:13px;color:#9ca3af">/5</span>';
+  card.querySelector('.cc-level').textContent = levelLabel(nv);
+  const total = Object.values(gradingResults.scores).reduce((a,b)=>a+b,0);
+  const pct   = Math.round((total/20)*100);
+  document.querySelector('.score-number').innerHTML = total+'<span class="score-denom">/20</span>';
+  document.querySelector('.score-pct').textContent = pct+'%';
+  document.getElementById('score-bar').style.width = pct+'%';
+  const g = GRADE_LABELS.find(gl=>total>=gl.min)||GRADE_LABELS[GRADE_LABELS.length-1];
+  document.querySelector('.score-grade-label').innerHTML =
+    `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>${g.label}`;
+}
+function updateRemark(id){
+  const v = document.getElementById('edit-remark-'+id).value;
+  gradingResults.remarks[id] = v;
+  document.getElementById('remark-'+id).textContent = v;
+}
+
+// ── SHARE ──
+function shareResults(){
+  const s = gradingResults.scores;
+  const total = Object.values(s).reduce((a,b)=>a+b,0);
+  const pct   = Math.round((total/20)*100);
+  const g     = GRADE_LABELS.find(gl=>total>=gl.min)||GRADE_LABELS[GRADE_LABELS.length-1];
+  const text  = `GOSO EVALUATION RESULTS
+NSG 127.4 - Psychiatric Nursing Clinical Exposure
+MSU - College of Health Sciences, Marawi City
+
+Student: ${gradingResults.studentName}
+Date: ${new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'})}
+
+TOTAL SCORE: ${total}/20 (${pct}%) - ${g.label}
+
+CRITERION SCORES
+---------------------------------
+Clarity and Conciseness (25%)
+Score: ${s.clarity}/5 - ${levelLabel(s.clarity)}
+Remarks: ${gradingResults.remarks.clarity}
+
+Measurability (25%)
+Score: ${s.measurability}/5 - ${levelLabel(s.measurability)}
+Remarks: ${gradingResults.remarks.measurability}
+
+Relevance to 2-Week Exposure (25%)
+Score: ${s.relevance}/5 - ${levelLabel(s.relevance)}
+Remarks: ${gradingResults.remarks.relevance}
+
+SMART Format Compliance (25%)
+Score: ${s.smart}/5 - ${levelLabel(s.smart)}
+Remarks: ${gradingResults.remarks.smart}
+
+---------------------------------
+TRANSCRIBED OBJECTIVES
+---------------------------------
+${gradingResults.transcribed_text}
+
+Graded using GOSO Evaluator
+Prof. A.D. Macalnas, RN, MAN
+Dept. of Nursing - MSU-CHS`;
+
+  if(navigator.share){ navigator.share({title:'GOSO Evaluation',text}).catch(()=>copyText(text)); }
+  else { copyText(text); }
+}
+function copyText(text){
+  navigator.clipboard.writeText(text).then(()=>showToast('Copied to clipboard')).catch(()=>showToast('Copy failed'));
+}
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg;
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500);
+}
+function newEvaluation(){ gradingResults=null; capturedImageData=null; showScreen('screen-home'); }
+</script>
+</body>
+</html>
